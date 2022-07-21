@@ -13,5 +13,13 @@ export async function getCategories(_, res) {
 export async function setCategories(req, res) {
   const { category } = res.locals;
 
-  res.sendStatus(200);
+  try {
+    await connection.query(
+      'INSERT INTO categories (name) VALUES ($1)', [ category.name ]
+    );
+
+    res.sendStatus(201);
+  } catch(err) {
+    res.sendStatus(500);
+  }
 }
