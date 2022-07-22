@@ -38,3 +38,7 @@ export async function getGames(req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function setGame(req, res) {
+  res.sendStatus(200);
+}
