@@ -26,21 +26,103 @@ function formatRental(unformattedRentals) {
   return formatteddRentals;
 }
 
+async function getAllRentals() {
+  const { rows:rentals } = await connection.query(
+    `
+    SELECT rentals.*, categories.name as "categoryName",
+    games.name as "gameName", games."categoryId",
+    customers.name as "customerName"
+    FROM rentals
+    JOIN games
+    ON games.id = rentals."gameId"
+    JOIN categories
+    ON games."categoryId" = categories.id
+    JOIN customers
+    ON customers.id = rentals."customerId";
+    `
+  );
+
+  return rentals;
+}
+
+async function filterByCustomerId(customerId) {
+  const { rows:rentals } = await connection.query(
+    `
+    SELECT rentals.*, categories.name as "categoryName",
+    games.name as "gameName", games."categoryId",
+    customers.name as "customerName"
+    FROM rentals
+    JOIN games
+    ON games.id = rentals."gameId"
+    JOIN categories
+    ON games."categoryId" = categories.id
+    JOIN customers
+    ON customers.id = rentals."customerId"
+    WHERE customers.id = $1;
+    `,
+    [ customerId ]
+  );
+
+  return rentals;
+}
+
+async function filterByGameId(gameId) {
+  const { rows:rentals } = await connection.query(
+    `
+    SELECT rentals.*, categories.name as "categoryName",
+    games.name as "gameName", games."categoryId",
+    customers.name as "customerName"
+    FROM rentals
+    JOIN games
+    ON games.id = rentals."gameId"
+    JOIN categories
+    ON games."categoryId" = categories.id
+    JOIN customers
+    ON customers.id = rentals."customerId"
+    WHERE games.id = $1;
+    `,
+    [ gameId ]
+  );
+
+  return rentals;
+}
+
+async function filterByCustomerAndGameId(customerId, gameId) {
+  const { rows:rentals } = await connection.query(
+    `
+    SELECT rentals.*, categories.name as "categoryName",
+    games.name as "gameName", games."categoryId",
+    customers.name as "customerName"
+    FROM rentals
+    JOIN games
+    ON games.id = rentals."gameId"
+    JOIN categories
+    ON games."categoryId" = categories.id
+    JOIN customers
+    ON customers.id = rentals."customerId"
+    WHERE customers.id = $1 AND games.id = $2;
+    `,
+    [ customerId, gameId ]
+  );
+
+  return rentals;
+}
+
 export async function getRentals(req, res) {
+  const { customerId, gameId } = req.query;
+
   try {
-    const { rows:rentals } = await connection.query(
-      `
-      SELECT rentals.*, categories.name as "categoryName",
-      games.name as "gameName", customers.name as "customerName"
-      FROM rentals
-      JOIN games
-      ON games.id = rentals."gameId"
-      JOIN categories
-      ON games."categoryId" = categories.id
-      JOIN customers
-      ON customers.id = rentals."customerId";
-      `
-    );
+    let rentals;
+
+    if(customerId && gameId) {
+      rentals = await filterByCustomerAndGameId(customerId, gameId);
+    } else if(customerId) {
+      rentals = await filterByCustomerId(customerId);
+    } else if(gameId) {
+      rentals = await filterByGameId(gameId);
+    } else {
+      rentals = await getAllRentals();
+    }
 
     const formatteddRentals = formatRental(rentals);
 
