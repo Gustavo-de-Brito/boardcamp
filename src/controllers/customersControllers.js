@@ -32,3 +32,24 @@ export async function getCustomers(req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function getCustomersById(req, res) {
+  const { id } = req.params;
+
+  try {
+    const { rows: customer } = await connection.query(
+      `
+      SELECT * FROM customers WHERE id = $1
+      `,
+      [ id ]
+    );
+
+    if(customer.length === 0) {
+      return res.sendStatus(404);
+    }
+
+    res.status(200).send(customer[0]);
+  } catch(err) {
+    res.sendStatus(500);
+  }
+}
