@@ -53,3 +53,7 @@ export async function getCustomersById(req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function setCustomer(req, res) {
+  res.sendStatus(201);
+}
