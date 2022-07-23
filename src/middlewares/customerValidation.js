@@ -5,9 +5,7 @@ function customerValidation(req, res, next) {
 
   const { error } = customerSchema.validate(newCustomer);
 
-  if(error) {
-    return res.sendStatus(400);
-  }
+  if(error) return res.sendStatus(400);
 
   next();
 }

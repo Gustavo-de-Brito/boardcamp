@@ -6,8 +6,6 @@ export async function getCustomers(req, res) {
   try {
     let customersList;
 
-    console.log(cpf);
-
     if(cpf) {
       const { rows:customers } = await connection.query(
         `
@@ -44,9 +42,7 @@ export async function getCustomersById(req, res) {
       [ id ]
     );
 
-    if(customer.length === 0) {
-      return res.sendStatus(404);
-    }
+    if(customer.length === 0) return res.sendStatus(404);
 
     res.status(200).send(customer[0]);
   } catch(err) {
