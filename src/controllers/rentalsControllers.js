@@ -1,4 +1,5 @@
 import connection from '../databases/postgres.js';
+import dayjs from 'dayjs';
 
 function formatRental(unformattedRentals) {
   const formatteddRentals = unformattedRentals.map(rental => {
@@ -129,6 +130,16 @@ export async function getRentals(req, res) {
     res.status(200).send(formatteddRentals);
   } catch(err) {
     console.log(err)
+    res.sendStatus(500);
+  }
+}
+
+export async function setRent(req, res) {
+  try {
+    const date = dayjs().format('YYYY-MM-DD');
+
+    res.sendStatus(201);
+  } catch(err) {
     res.sendStatus(500);
   }
 }
