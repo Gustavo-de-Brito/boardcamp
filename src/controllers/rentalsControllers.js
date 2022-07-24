@@ -120,8 +120,15 @@ async function calculateFee(gameId, rentDate, daysRented) {
 
   const currentDate = dayjs();
   const totalDaysRented = currentDate.diff(rentDate, 'days');
-  
-  const totalFee = (totalDaysRented - daysRented) * game[0].pricePerDay;
+
+  let totalFee;
+  const feeDays = totalDaysRented - daysRented;
+
+  if(feeDays > 0) {
+    totalFee = feeDays * game[0].pricePerDay;
+  } else {
+    totalFee = 0;
+  }
 
   return totalFee;
 }
@@ -187,21 +194,20 @@ export async function setRent(req, res) {
 
 export async function finishRent(req, res) {
   const { id } = req.params;
+  const { rent } = res.locals;
 
   try {
-    const { rows:rent } = await connection.query(
+    const delayFee = await calculateFee(rent.gameId, rent.rentDate, rent.daysRented);
+    const returnDate = dayjs().format('YYYY-MM-DD');
+
+    await connection.query(
       `
-      SELECT * FROM rentals
-      WHERE id = $1
+      UPDATE rentals
+      SET "delayFee" = $1, "returnDate" = $2
+      WHERE id = $3;
       `,
-      [ id ]
+      [ delayFee, returnDate, id ]
     );
-
-    if(!rent[0]) return res.sendStatus(404);
-    if(!rent[0].returnDate) return res.sendStatus(400);
-
-    const totalFee = await calculateFee(rent[0].gameId, rent[0].rentDate, rent[0].daysRented);
-    const returnDate = daysjs().format('YYYY-MM-DD');
 
     res.sendStatus(200);
   } catch(err) {
