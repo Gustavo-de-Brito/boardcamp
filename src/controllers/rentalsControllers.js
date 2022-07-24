@@ -1,6 +1,7 @@
 import connection from '../databases/postgres.js';
 import dayjs from 'dayjs';
 
+// auxiliary functions
 function formatRental(unformattedRentals) {
   const formatteddRentals = unformattedRentals.map(rental => {
     const formatteddRent = {
@@ -109,6 +110,23 @@ async function filterByCustomerAndGameId(customerId, gameId) {
   return rentals;
 }
 
+async function calculateFee(gameId, rentDate, daysRented) {
+  const { rows: game } = await connection.query(
+    `
+    SELECT * FROM games
+    WHERE id = $1`,
+    [ gameId ]
+  );
+
+  const currentDate = dayjs();
+  const totalDaysRented = currentDate.diff(rentDate, 'days');
+  
+  const totalFee = (totalDaysRented - daysRented) * game[0].pricePerDay;
+
+  return totalFee;
+}
+
+// controllers
 export async function getRentals(req, res) {
   const { customerId, gameId } = req.query;
 
@@ -162,6 +180,30 @@ export async function setRent(req, res) {
     );
 
     res.sendStatus(201);
+  } catch(err) {
+    res.sendStatus(500);
+  }
+}
+
+export async function finishRent(req, res) {
+  const { id } = req.params;
+
+  try {
+    const { rows:rent } = await connection.query(
+      `
+      SELECT * FROM rentals
+      WHERE id = $1
+      `,
+      [ id ]
+    );
+
+    if(!rent[0]) return res.sendStatus(404);
+    if(!rent[0].returnDate) return res.sendStatus(400);
+
+    const totalFee = await calculateFee(rent[0].gameId, rent[0].rentDate, rent[0].daysRented);
+    const returnDate = daysjs().format('YYYY-MM-DD');
+
+    res.sendStatus(200);
   } catch(err) {
     res.sendStatus(500);
   }
