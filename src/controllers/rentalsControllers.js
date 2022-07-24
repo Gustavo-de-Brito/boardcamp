@@ -135,8 +135,19 @@ export async function getRentals(req, res) {
 }
 
 export async function setRent(req, res) {
+  const newRent = req.body;
+  const { gamePrice } = res.locals;
+
   try {
-    const date = dayjs().format('YYYY-MM-DD');
+    const formattedRent = {
+      ...newRent,
+      rentDate: dayjs().format('YYYY-MM-DD'),
+      originalPrice: gamePrice * newRent.daysRented,
+      returnDate: null,
+      delayFee: null
+    }
+
+    console.log(formattedRent);
 
     res.sendStatus(201);
   } catch(err) {
