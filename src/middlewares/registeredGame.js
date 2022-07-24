@@ -1,6 +1,6 @@
 import connection from '../databases/postgres.js';
 
-async function registerdGame(req, res, next) {
+async function registeredGame(req, res, next) {
   const { gameId } = req.body;
 
   try {
@@ -22,4 +22,4 @@ async function registerdGame(req, res, next) {
   }
 }
 
-export default registerdGame;
+export default registeredGame;

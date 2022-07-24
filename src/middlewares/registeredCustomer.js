@@ -1,6 +1,6 @@
 import connection from '../databases/postgres.js';
 
-async function registerdCustomer(req, res, next) {
+async function registeredCustomer(req, res, next) {
   const { customerId } = req.body;
 
   try {
@@ -19,4 +19,4 @@ async function registerdCustomer(req, res, next) {
   }
 }
 
-export default registerdCustomer;
+export default registeredCustomer;

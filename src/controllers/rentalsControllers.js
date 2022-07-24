@@ -214,3 +214,21 @@ export async function finishRent(req, res) {
     res.sendStatus(500);
   }
 }
+
+export async function deleteRent(req, res) {
+  const { id } = req.params;
+
+  try{
+    await connection.query(
+      `
+      DELETE FROM rentals
+      WHERE id = $1;
+      `,
+      [ id ]
+    );
+
+    res.sendStatus(200);
+  } catch(err) {
+    res.sendStatus(500);
+  }
+}
